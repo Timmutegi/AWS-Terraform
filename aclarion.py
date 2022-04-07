@@ -4,7 +4,7 @@ import botocore
 import requests
 import json
 from botocore.exceptions import ClientError
-import pathlib
+# import pathlib
 import uuid
 
 # https://hands-on.cloud/working-with-aws-lambda-in-python-using-boto3/#How-to-create-Lamda-function-using-Boto3
