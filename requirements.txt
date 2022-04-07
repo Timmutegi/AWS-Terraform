@@ -2,5 +2,5 @@ boto3
 botocore
 requests
 # logging
-pathlib
+# pathlib
 uuid
