@@ -1,11 +1,9 @@
 import boto3
 import logging
-import botocore
-import requests
 import json
 from botocore.exceptions import ClientError
-# import pathlib
 import uuid
+import argparse
 
 # https://hands-on.cloud/working-with-aws-lambda-in-python-using-boto3/#How-to-create-Lamda-function-using-Boto3
 # https://hands-on.cloud/working-with-sqs-in-python-using-boto3/
@@ -362,10 +360,6 @@ def deploy(rest_api_id, API_RESOURCE_ID, arn_uri):
         logging.error(e)
     else:         
         logger.info('API deployed successfully.')         
-
-    # all that done we can then send a request to invoke our lambda function
-    # https://123456.execute-api.us-east-1.amazonaws.com/dev?greeter=John
-    # print(deployment)
     
     
 def create_queue(queue_name, delay_seconds, visiblity_timeout, queue_arn, bucket_name, account_id):
@@ -430,7 +424,7 @@ def upload_files(file_name, bucket, object_name=None, args=None):
         s3_client.upload_file(file_name, bucket, object_name, ExtraArgs=args)
 
     except ClientError:
-        logger.exception(f'Could not create SQS queue - {queue_name}.')
+        logger.exception(f'Could not upload files to - {bucket}.')
         
     else:
         logger.info(f"'{file_name}' has been uploaded to '{bucket}'")
@@ -483,11 +477,7 @@ def create_bucket_notification(queue_name, queue_arn, bucket_name):
         logger.info('Bucket event notification has been added successfully.')
         return response
 
-    
-########################################
-# Main routine
-########################################
-def main():
+def demo():
     # CONSTANTS
     ACCOUNT_ID = get_account_id()
     QUEUE_NAME = 'aclarion-queue'
@@ -497,23 +487,24 @@ def main():
     S3_BUCKET_NAME = 'aclarion-bucket-1'
     LAMBDA_FUNCTION_NAME = 'aclarionLambdaFunction'
     
-    # logger.info('Creating an S3 bucket')
-    # create_bucket('aclarion-bucket-1')
+    logger.info('Creating an S3 bucket')
+    create_bucket('aclarion-bucket-1')
     
     # logger.info('Fetching existing buckets') 
     # fetch_buckets()
 
-    # logger.info('Creating SQS queue.')
-    # output = create_queue(QUEUE_NAME, DELAY_SECONDS, VISIBLITY_TIMEOUT, QUEUE_ARN, S3_BUCKET_NAME, ACCOUNT_ID)    
-    # QUEUE_URL = output.url
+    logger.info('Creating SQS queue.')
+    output = create_queue(QUEUE_NAME, DELAY_SECONDS, VISIBLITY_TIMEOUT, QUEUE_ARN, S3_BUCKET_NAME, ACCOUNT_ID)    
+    QUEUE_URL = output.url
+    logger.info(f"The queue URL is '{QUEUE_URL}'")
 
-    # logger.info('Creating bucket notification')
-    # create_bucket_notification(QUEUE_NAME, QUEUE_ARN, S3_BUCKET_NAME)    
+    logger.info('Creating bucket notification')
+    create_bucket_notification(QUEUE_NAME, QUEUE_ARN, S3_BUCKET_NAME)    
         
-    # logger.info('Uploading files to the S3 bucket')   
-    # upload_files('./files/demo.png', S3_BUCKET_NAME)
+    logger.info('Uploading files to the S3 bucket')   
+    upload_files('./files/demo.png', S3_BUCKET_NAME)
         
-    # logger.info('Creating lambda execution role')
+    logger.info('Creating lambda execution role')
     # create_lambda_execution_role()
     ROLE = get_lambda_execution_role()
     
@@ -552,8 +543,72 @@ def main():
     create_post_method(REST_API_ID, API_RESOURCE_ID)
     
     logger.info('Deploying REST API in API Gateway..')
-    deploy(REST_API_ID, API_RESOURCE_ID, LAMBDA_ARN)           
-    
+    deploy(REST_API_ID, API_RESOURCE_ID, LAMBDA_ARN)
+
+
+def destroy(rest_api_id, lambda_function_name):
+    """
+    Destroys all the resources created
+    :param rest_api_name: The name of the demo REST API.
+    :param lambda_function_name: The name of the lambda function
+    """   
+    api_client = boto3.client('apigateway')
+
+    logger.info('Deleting REST API')
+
+    try:
+        response = api_client.delete_rest_api(
+            restApiId = rest_api_id
+        )
+
+    except ClientError:
+        logger.exception('Error deleting the REST API')
+    else:
+        logger.info('Successfully deleted REST API')
+
+
+    lambda_client = boto3.client('lambda')
+
+    logger.info('Deleting Lambda Function')
+
+    try:
+        response = lambda_client.delete_function(
+            FunctionName = lambda_function_name
+        )
+    except ClientError:
+        logger.exception('Error deleting the lambda function')
+    else:
+        logger.info('Successfully deleted lambda function')
+
+
+########################################
+# Main routine
+########################################
+def main():
+    parser = argparse.ArgumentParser(
+        description="Runs the Aclarion Proof of Concept Demo. Run this script with the "
+                    "'demo' flag to see example usage. Run with the 'destroy' flag to "
+                    "clean up all resources.")
+    parser.add_argument(
+        'action', choices=['demo', 'destroy'],
+        help="Indicates the action the script performs.")
+    args = parser.parse_args()
+
+    print('-'*88)
+    print("Welcome to the Aclarion Proof of Concept Demo!")
+    print('-'*88)
+
+    logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+
+    if args.action == 'demo':
+        print("Deploying prerequisite resources for the demo.")
+        demo()
+    elif args.action == 'destroy':
+        print("Destroying AWS resources created for the demo.")
+        destroy('zd4h1h28u5','aclarionLambdaFunction')
+
+    print('-'*88)
+
 if __name__ == '__main__':
     main()    
         
