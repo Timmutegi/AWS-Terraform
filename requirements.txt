@@ -1,6 +1,5 @@
 boto3
 botocore
 requests
-# logging
-# pathlib
 uuid
+argparse
