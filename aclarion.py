@@ -327,7 +327,7 @@ def deploy(rest_api_id, API_RESOURCE_ID, arn_uri):
 
     :param rest_api_id: The ID of the API
     :param API_RESOURCE_ID: The ID of the root resource of the API
-    :arn_uri: the uri of the REST API
+    :arn_uri: The uri of the REST API
     """     
     arn_uri = "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/" + arn_uri + "/invocations"
     
