@@ -37,3 +37,4 @@ terraform.rc
 lambda_layer
 .DS_Store
 lambda*
+.vscode
