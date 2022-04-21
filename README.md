@@ -25,5 +25,6 @@
 4. Run `terraform init`
 5. Run `terraform apply`
 6. Copy the base URL displayed in the terminal
-7. Open a browser and add a query parameter i.e. base_url/dev/file?url=%22https://www.facebook.com/favicon.ico%22
+7. Open a browser and add a query parameter i.e. `https://36r9oe8n50.execute-api.us-west-1.amazonaws.com/dev/file?url=%22https://www.facebook.com/favicon.ico%22`
 6. To destroy the resources, run `terraform destroy`
+https://36r9oe8n50.execute-api.us-west-1.amazonaws.com/dev/file
