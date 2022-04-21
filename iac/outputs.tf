@@ -3,5 +3,5 @@ output "base_url" {
 }
 
 output "bucket_name" {
-  value = "${aws_s3_bucket.bucket.id}"
+  value = "${aws_s3_bucket.s3_bucket.id}"
 }
