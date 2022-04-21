@@ -1,3 +1,3 @@
-region = "value"
-aws_access_key = "value"
-aws_secret_key = "value"
+region = "us-west-1"
+aws_access_key = "***********************"
+aws_secret_key = "***********************"
