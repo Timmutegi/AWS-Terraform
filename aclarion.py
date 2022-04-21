@@ -14,12 +14,18 @@ import argparse
 
 AWS_REGION = "us-east-1"
 
+QUEUE_NAME = "tesh-mutegi-queue"
+DELAY_SECONDS = "0"
+VISIBLITY_TIMEOUT = "60"
+QUEUE_ARN = "arn:aws:sqs:us-east-1:973861173512:tesh-mutegi-queue"
+S3_BUCKET_NAME = "tesh-mutegi-bucket"
+LAMBDA_FUNCTION_NAME = "TeshMutegiFunction"
+
 # logger config
 logger = logging.getLogger()
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s: %(levelname)s: %(message)s"
 )
-
 
 def get_account_id():
     """
@@ -118,7 +124,7 @@ def create_api_execution_role():
 
     try:
         response = iam.create_role(
-            RoleName="aclarionRole",
+            RoleName="apiExecutionRole",
             AssumeRolePolicyDocument=json.dumps(role_policy),
         )
 
@@ -411,6 +417,18 @@ def create_queue(
         return response
 
 
+def get_queue_arn(queue_url):
+    client = boto3.resource("sqs", region_name=AWS_REGION)
+
+    response = client.get_queue_attributes(
+        QueueUrl=queue_url,
+        AttributeNames=[
+            'QueueArn'
+        ]
+    )
+
+    return response
+
 def upload_files(file_name, bucket, object_name=None, args=None):
     """
     Upload files to an S3 bucket
@@ -478,15 +496,9 @@ def create_bucket_notification(queue_name, queue_arn, bucket_name):
 def demo():
     # CONSTANTS
     ACCOUNT_ID = get_account_id()
-    QUEUE_NAME = "aclarion-queue"
-    DELAY_SECONDS = "0"
-    VISIBLITY_TIMEOUT = "60"
-    QUEUE_ARN = "arn:aws:sqs:us-east-1:973861173512:aclarion-queue"
-    S3_BUCKET_NAME = "aclarion-bucket-1"
-    LAMBDA_FUNCTION_NAME = "aclarionLambdaFunction"
 
     logger.info("Creating an S3 bucket")
-    create_bucket("aclarion-bucket-1")
+    create_bucket(S3_BUCKET_NAME)
 
     # logger.info('Fetching existing buckets')
     # fetch_buckets()
@@ -521,7 +533,7 @@ def demo():
     LAMBDA_ARN = create_lambda_function(LAMBDA_FUNCTION_NAME, ROLE)
 
     logger.info("Creating REST API")
-    REST_API_ID = create_rest_api("aclarionAPI")
+    REST_API_ID = create_rest_api(QUEUE_NAME)
 
     aws_lambda = boto3.client("lambda", region_name=AWS_REGION)
 
@@ -588,7 +600,7 @@ def destroy(rest_api_id, lambda_function_name):
 ########################################
 def main():
     parser = argparse.ArgumentParser(
-        description="Runs the Aclarion Proof of Concept Demo. Run this script with the "
+        description="Runs this script with the "
         "'demo' flag to see example usage. Run with the 'destroy' flag to "
         "clean up all resources."
     )
@@ -600,7 +612,7 @@ def main():
     args = parser.parse_args()
 
     print("-" * 88)
-    print("Welcome to the Aclarion Proof of Concept Demo!")
+    print("Welcome to the AWS Demo!")
     print("-" * 88)
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
@@ -610,7 +622,7 @@ def main():
         demo()
     elif args.action == "destroy":
         print("Destroying AWS resources created for the demo.")
-        destroy("zd4h1h28u5", "aclarionLambdaFunction")
+        destroy("zd4h1h28u5", LAMBDA_FUNCTION_NAME)
 
     print("-" * 88)
 
