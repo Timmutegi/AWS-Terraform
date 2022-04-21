@@ -3,7 +3,7 @@ variable "region" {
 }
 
 variable "resource_name" {
-  default = "number"
+  default = "file"
 }
 
 variable "stage" {
