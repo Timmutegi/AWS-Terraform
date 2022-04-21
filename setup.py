@@ -5,13 +5,6 @@ from botocore.exceptions import ClientError
 import uuid
 import argparse
 
-# %22https://www.facebook.com/favicon.ico%22
-# https://hands-on.cloud/working-with-aws-lambda-in-python-using-boto3/#How-to-create-Lamda-function-using-Boto3
-# https://hands-on.cloud/working-with-sqs-in-python-using-boto3/
-# https://hands-on.cloud/introduction-to-boto3-library/
-# https://www.learnaws.org/2020/12/17/aws-sqs-boto3-guide/
-# https://lifesaver.codes/answer/how-to-add-an-api-endpoint-for-a-lambda-function-572
-
 AWS_REGION = "us-east-1"
 
 QUEUE_NAME = "tesh-mutegi-queue"
